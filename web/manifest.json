@@ -1,11 +1,11 @@
 {
-    "name": "pizzeria_app",
-    "short_name": "pizzeria_app",
+    "name": "Good Pizza",
+    "short_name": "Good Pizza",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Commandez vos pizzas chez Good Pizza",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
