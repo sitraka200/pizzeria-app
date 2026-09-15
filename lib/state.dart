@@ -16,6 +16,8 @@ class AuthModel extends ChangeNotifier {
 
   bool get isLoggedIn => api.isLoggedIn;
 
+  bool get isStaff => api.isStaff;
+
   Future<void> login(String email, String password) async {
     await api.login(email, password);
     notifyListeners();

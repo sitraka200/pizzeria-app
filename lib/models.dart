@@ -137,6 +137,8 @@ class Order {
   final int totalCents;
   final List<OrderItem> items;
   final DateTime createdAt;
+  final String? customerName;
+  final String? customerPhone;
 
   Order({
     required this.id,
@@ -147,20 +149,27 @@ class Order {
     required this.totalCents,
     required this.items,
     required this.createdAt,
+    this.customerName,
+    this.customerPhone,
   });
 
-  factory Order.fromJson(Map<String, dynamic> json) => Order(
-        id: json['id'] as int,
-        reference: json['reference'] as String,
-        type: json['type'] as String,
-        status: json['status'] as String,
-        comment: json['comment'] as String?,
-        totalCents: json['totalCents'] as int,
-        items: ((json['items'] ?? []) as List)
-            .map((i) => OrderItem.fromJson(i as Map<String, dynamic>))
-            .toList(),
-        createdAt: DateTime.parse(json['createdAt'] as String),
-      );
+  factory Order.fromJson(Map<String, dynamic> json) {
+    final customer = json['customer'];
+    return Order(
+      id: json['id'] as int,
+      reference: json['reference'] as String,
+      type: json['type'] as String,
+      status: json['status'] as String,
+      comment: json['comment'] as String?,
+      totalCents: json['totalCents'] as int,
+      items: ((json['items'] ?? []) as List)
+          .map((i) => OrderItem.fromJson(i as Map<String, dynamic>))
+          .toList(),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      customerName: customer is Map ? customer['name'] as String? : null,
+      customerPhone: customer is Map ? customer['phone'] as String? : null,
+    );
+  }
 
   bool get isCancellable => status == 'placed' || status == 'confirmed';
 }

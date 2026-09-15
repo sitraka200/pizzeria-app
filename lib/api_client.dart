@@ -28,6 +28,22 @@ class ApiClient {
 
   bool get isLoggedIn => _token != null;
 
+  /// Rôles portés par le JWT courant.
+  List<String> get roles {
+    final token = _token;
+    if (token == null) return const [];
+    try {
+      final payload = json.decode(utf8.decode(
+              base64Url.decode(base64Url.normalize(token.split('.')[1]))))
+          as Map<String, dynamic>;
+      return List<String>.from(payload['roles'] as List? ?? const []);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  bool get isStaff => roles.contains('ROLE_STAFF');
+
   Future<void> loadTokens() async {
     final prefs = await SharedPreferences.getInstance();
     _token = prefs.getString('token');
@@ -177,8 +193,12 @@ class ApiClient {
     return Order.fromJson(_decode(response, expected: 201) as Map<String, dynamic>);
   }
 
-  Future<List<Order>> fetchOrders() async {
-    final data = _decode(await _send('GET', '/orders', auth: true)) as List;
+  /// Commandes du client connecté ; pour le staff, toutes les commandes
+  /// (éventuellement filtrées par statut).
+  Future<List<Order>> fetchOrders({String? status}) async {
+    final query = status != null ? '&status=$status' : '';
+    final data = _decode(
+        await _send('GET', '/orders?itemsPerPage=100$query', auth: true)) as List;
     return data.map((o) => Order.fromJson(o as Map<String, dynamic>)).toList();
   }
 
@@ -187,11 +207,15 @@ class ApiClient {
     return Order.fromJson(data as Map<String, dynamic>);
   }
 
-  Future<Order> cancelOrder(int id) async {
+  /// Applique une transition du cycle de vie (confirm, pay, prepare,
+  /// mark_ready, deliver, cancel) — l'API refuse les transitions invalides.
+  Future<Order> applyTransition(int id, String transition) async {
     final response = await _send('PATCH', '/orders/$id/transition',
         auth: true,
-        jsonBody: {'transition': 'cancel'},
+        jsonBody: {'transition': transition},
         contentType: 'application/merge-patch+json');
     return Order.fromJson(_decode(response) as Map<String, dynamic>);
   }
+
+  Future<Order> cancelOrder(int id) => applyTransition(id, 'cancel');
 }

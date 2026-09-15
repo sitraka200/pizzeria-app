@@ -8,6 +8,7 @@ import 'cart_screen.dart';
 import 'login_screen.dart';
 import 'orders_screen.dart';
 import 'product_screen.dart';
+import 'staff_screen.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -48,8 +49,13 @@ class _MenuScreenState extends State<MenuScreen> {
       if (ok != true || !mounted) return;
     }
     if (!mounted) return;
+    // Un membre du staff arrive directement sur la caisse.
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const OrdersScreen()),
+      MaterialPageRoute(
+        builder: (_) => context.read<AuthModel>().isStaff
+            ? const StaffScreen()
+            : const OrdersScreen(),
+      ),
     );
   }
 
@@ -94,6 +100,14 @@ class _MenuScreenState extends State<MenuScreen> {
             appBar: AppBar(
               title: const Text('🍕 Good Pizza'),
               actions: [
+                if (context.watch<AuthModel>().isStaff)
+                  IconButton(
+                    icon: const Icon(Icons.point_of_sale),
+                    tooltip: 'Caisse',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const StaffScreen()),
+                    ),
+                  ),
                 IconButton(
                   icon: const Icon(Icons.receipt_long),
                   tooltip: 'Mes commandes',
