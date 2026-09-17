@@ -1,6 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Indispensable en build release : sans elle, tout accès réseau échoue
+         en "Failed host lookup" (le debug l'obtient via son propre manifeste). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="pizzeria_app"
+        android:label="Good Pizza"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
