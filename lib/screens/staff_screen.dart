@@ -42,7 +42,7 @@ const _actions = <String, List<(String, String, IconData, bool)>>{
   'ready': [('deliver', 'Remise au client', Icons.handshake, false)],
 };
 
-class _StaffScreenState extends State<StaffScreen> {
+class _StaffScreenState extends State<StaffScreen> with WidgetsBindingObserver {
   int _filterIndex = 0;
   List<Order>? _orders;
   String? _error;
@@ -52,14 +52,25 @@ class _StaffScreenState extends State<StaffScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
     _timer = Timer.periodic(const Duration(seconds: 10), (_) => _load());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
+  }
+
+  /// Les navigateurs suspendent les timers des onglets en arrière-plan :
+  /// on recharge dès que l'onglet (ou l'app) redevient visible.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _load();
+    }
   }
 
   Future<void> _load() async {

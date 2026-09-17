@@ -18,7 +18,8 @@ class OrderDetailScreen extends StatefulWidget {
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
 }
 
-class _OrderDetailScreenState extends State<OrderDetailScreen> {
+class _OrderDetailScreenState extends State<OrderDetailScreen>
+    with WidgetsBindingObserver {
   Order? _order;
   String? _error;
   Timer? _timer;
@@ -27,14 +28,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _load();
     _timer = Timer.periodic(const Duration(seconds: 15), (_) => _load());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
     super.dispose();
+  }
+
+  /// Recharge immédiate quand l'onglet ou l'app revient au premier plan
+  /// (les timers sont suspendus en arrière-plan par les navigateurs).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _load();
+    }
   }
 
   Future<void> _load() async {
